@@ -11,6 +11,6 @@ Four steps:
 1. Create a container from `mysql:5`.
 2. Export it to a tarball.
 3. Import it to a new, flat image.
-3. Re-apply all the environmental and configuration effects.
+4. Re-apply all the environmental and configuration effects, sans `VOLUME`.
 
 [1]: https://registry.hub.docker.com/_/mysql/ 
