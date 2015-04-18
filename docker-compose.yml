@@ -1,16 +1,3 @@
-##
-# `docker-compose run --rm build`
-# will try to create a fresh sql dump.
-#
-# If it fails, make sure db is new and empty.
-# Also make sure to have the tarball for the version of Magento
-# in this directory.
-# Also be aware you may have to explicitly build before running
-# due to https://github.com/docker/compose/issues/1275
-#
-# This Docker Composition does not clean up images or containers
-# after itself. The point is for you to commit the db container.
-#
 db:
     image: kojiromike/magedb:basis
 build:
