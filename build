@@ -1,0 +1,53 @@
+#!/bin/bash -e
+
+##
+# This gets run within the container.
+
+install_magento() {
+    php install.php \
+        --admin_email admin@example.com \
+        --admin_firstname ad \
+        --admin_lastname min \
+        --admin_password testing123 \
+        --admin_username admin \
+        --db_host db_1 \
+        --db_name "$DB_1_ENV_MYSQL_DATABASE" \
+        --db_pass "$DB_1_ENV_MYSQL_PASSWORD" \
+        --db_user "$DB_1_ENV_MYSQL_USER" \
+        --default_currency USD \
+        --license_agreement_accepted yes \
+        --locale en_US \
+        --secure_base_url "http://example.com/" \
+        --skip_url_validation yes \
+        --timezone America/New_York \
+        --url "http://example.com/" \
+        --use_rewrites yes \
+        --use_secure no \
+        --use_secure_admin no
+}
+
+found=
+for mage in /build/magento-*.tar.xz; do
+    [[ -f $mage ]] || continue
+    found=1
+    printf 'Found "%s". Building.\n' "$mage"
+    cd /srv
+    tar -xJf "$mage"
+    cd /srv/magento
+    while sleep 1; do
+        install_magento && break
+        (( countdown++ <= 10 )) || exit 1
+    done
+    mysql -h db_1 -u $DB_1_ENV_MYSQL_USER \
+          --password=$DB_1_ENV_MYSQL_PASSWORD \
+          -e 'delete from core_config_data where path like "web/%/base_url";' \
+          $DB_1_ENV_MYSQL_DATABASE
+    break
+done
+
+if [[ ! $found ]]; then
+    echo 'Did not find a Magento tar.xz file to install.'
+    sleep 1 # Workaround for Docker buffering?
+    echo
+    exit 1
+fi 1>&2
